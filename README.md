@@ -1,5 +1,5 @@
 # Functional Programming in Scala
 
-Worksheet with answers to the exercises in the book [“Functional Programming in Scala”](http://manning.com/bjarnason).
+Worksheet for the **exercises** in my study of the [“Functional Programming in Scala”](http://manning.com/bjarnason) book.
 
-Starting templates were are taken from the companion repository of the book, containing exercises, hints, and answers: <https://github.com/fpinscala/fpinscala>
+Starting templates were taken from the companion repository of this book, containing exercises, hints, and answers: <https://github.com/fpinscala/fpinscala>
