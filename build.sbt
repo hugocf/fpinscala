@@ -11,4 +11,6 @@ organization := "fpinscala"
 // scalariformSettings
 
 // Libraries
-libraryDependencies += "org.scalatest" %% "scalatest" % "2.2.6" % Test
+libraryDependencies ++= Seq(
+  "org.scalatest" %% "scalatest" % "2.2.6" % Test withSources(),
+  "org.scalacheck" %% "scalacheck" % "1.12.5" % Test withSources())
