@@ -36,7 +36,39 @@ object MyModule {
 
   // Exercise 1: Write a function to compute the nth fibonacci number
 
-  def fib(n: Int): Int = ???
+  // Hints taken from <http://peter-braun.org/2012/06/fibonacci-numbers-in-scala/>
+  // - Using `match` instead of `if`
+  // - Count down to 0 instead of up to `n`
+  def fib(n: Int): Int = {
+    // Int overflow detected by the numbers generator scalacheck test
+    require(0 <= n && n <= 44, "only available for numbers between [0..44]")
+
+    @annotation.tailrec
+    def go(curr: Int, fib_1: Int, fib_2: Int): Int = curr match {
+      case 0 => fib_2
+      case c => go(curr - 1, fib_2 + fib_1, fib_1)
+    }
+    go(n, 1, 0)
+  }
+
+  def fib_first_tailrec_version(n: Int): Int = {
+    @annotation.tailrec
+    def go(curr: Int, fib_1: Int, fib_2: Int): Int = {
+      val fib = if (curr == 0 || curr == 1) curr else fib_1 + fib_2
+      if (curr < n) go(curr + 1, fib, fib_1)
+      else fib
+    }
+    go(0, 0, 0)
+  }
+
+  def fib_non_tailrec(n: Int): Int = {
+    // @annotation.tailrec  // Error!
+    def go(curr: Int): Int = {
+      if (curr == 0 || curr == 1) curr
+      else go(curr - 1) + go(curr - 2)
+    }
+    go(n)
+  }
 
   // This definition and `formatAbs` are very similar..
   private def formatFactorial(n: Int) = {
