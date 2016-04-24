@@ -1,15 +1,13 @@
 package fpinscala.ch02gettingstarted
 
-import org.scalacheck.Gen
+import org.scalacheck.{Gen, Shrink}
 import org.scalatest._
 import org.scalatest.prop.PropertyChecks
 
-import scala.collection.immutable.{BitSet, HashSet, TreeSet}
-
 class GettingStartedSpec extends WordSpec with PropertyChecks with Matchers {
-  import MyModule._
 
   "fibonacci (with scalacheck Tables)" must {
+    import MyModule._
     val fibonacci = Seq(0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233)
 
     "match the calculated fib number in a results Table" in {
@@ -28,6 +26,7 @@ class GettingStartedSpec extends WordSpec with PropertyChecks with Matchers {
   }
 
   "fibonacci (with scalacheck Generator)" must {
+    import MyModule._
     // Gen.posNum[Int] goes from 1...Int.MaxValue which causes `fib` to go around to negative values
     val smallNonNegativeNums = Gen.choose(0, 42)
 
@@ -48,6 +47,34 @@ class GettingStartedSpec extends WordSpec with PropertyChecks with Matchers {
     "be strictly ordered fib(n) < fib(n+1) for every n != 1" in {
       forAll((smallNonNegativeNums, "num")) { n: Int =>
         whenever(n != 1)(fib(n) should be < fib(n + 1))
+      }
+    }
+  }
+
+  "isSorted" must {
+    import PolymorphicFunctions._
+    def gt(a: Int, b: Int) = a > b
+    val intArray = Gen.containerOf[Array, Int](Gen.chooseNum(Int.MinValue, Int.MaxValue))
+
+    "return true for any sorted array" in {
+      // Array(2, 2, 3, 1) => Array(1, 2, 3)
+      val sortedUniqueInts = intArray map { _.sorted.distinct }
+      forAll(sortedUniqueInts) { xs =>
+        isSorted(xs, gt) shouldBe true
+      }
+    }
+
+    "return false for unordered lists" in {
+      // turn off shrinking to show the exact error case!
+      implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
+      // Array() => X
+      // Array(1, 2, 3) => Array(1, 2, 3, 1)
+      val unorderedDupInts = intArray suchThat { _.length > 0 } map { xs => xs :+ xs.head }
+
+      isSorted(Array(123,123), gt)
+
+      forAll(unorderedDupInts) { xs =>
+        isSorted(xs, gt) shouldBe false
       }
     }
   }
