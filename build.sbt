@@ -3,9 +3,9 @@ scalaVersion := "2.11.8"
 scalacOptions += "-deprecation"
 
 // Project
-name := "exercises"
+organization := "cc.ferreira"
+name := "fpinscala exercises"
 version := "1.0.0-SNAPSHOT"
-organization := "fpinscala"
 
 // Code Formatting
 // scalariformSettings
