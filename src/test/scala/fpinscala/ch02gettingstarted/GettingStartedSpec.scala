@@ -71,8 +71,6 @@ class GettingStartedSpec extends WordSpec with PropertyChecks with Matchers {
       // Array(1, 2, 3) => Array(1, 2, 3, 1)
       val unorderedDupInts = intArray suchThat { _.length > 0 } map { xs => xs :+ xs.head }
 
-      isSorted(Array(123,123), gt)
-
       forAll(unorderedDupInts) { xs =>
         isSorted(xs, gt) shouldBe false
       }
