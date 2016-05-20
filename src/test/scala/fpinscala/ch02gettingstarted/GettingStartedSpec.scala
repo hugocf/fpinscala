@@ -1,10 +1,9 @@
 package fpinscala.ch02gettingstarted
 
+import fpinscala.BaseSpec
 import org.scalacheck.{Gen, Shrink}
-import org.scalatest._
-import org.scalatest.prop.PropertyChecks
 
-class GettingStartedSpec extends WordSpec with PropertyChecks with Matchers {
+class GettingStartedSpec extends BaseSpec {
 
   "fibonacci (with scalacheck Tables)" must {
     import MyModule._
