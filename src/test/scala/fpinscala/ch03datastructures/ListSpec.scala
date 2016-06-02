@@ -18,9 +18,17 @@ class ListSpec extends BaseSpec {
   implicit def myListArbitrary[T:Arbitrary]: Arbitrary[List[T]] = Arbitrary[List[T]](Gen.oneOf(myNilGen, myConsGen[T]))
 
   "tail" must {
-    "tail of a concatenation " in {
+    "return the list when concatenating an element with a list" in {
       forAll { (x: Int, xs: List[Int]) =>
         tail(Cons(x, xs)) shouldBe xs
+      }
+    }
+  }
+
+  "setHead" must {
+    "return the element when concatenating an element with a list" in {
+      forAll { (o: Int, x: Int, xs: List[Int]) =>
+        setHead(Cons(o, xs), x) shouldBe Cons(x, xs)
       }
     }
   }
