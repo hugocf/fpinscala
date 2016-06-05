@@ -6,6 +6,50 @@ import org.scalacheck.{Arbitrary, Gen, Shrink}
 
 class ListSpec extends BaseSpec {
 
+  "tail" must {
+    "return the list when concatenating an element with a list" in {
+      forAll { (x: Int, xs: Seq[Int]) =>
+        val xl = List(xs: _*)
+        tail(Cons(x, xl)) shouldBe xl
+      }
+    }
+  }
+
+  "setHead" must {
+    "return the element when concatenating an element with a list" in {
+      forAll { (o: Int, x: Int, xs: Seq[Int]) =>
+        val xl = List(xs: _*)
+        setHead(Cons(o, xl), x) shouldBe Cons(x, xl)
+      }
+    }
+  }
+
+  "drop" must {
+    "return the second list after dropping all elements of the first, when concatenating two lists" in {
+      forAll { (xs: Seq[Int], ys: Seq[Int]) =>
+        val xyl = List(xs ++ ys: _*)
+        drop(xyl, xs.length) shouldBe List(ys: _*)
+      }
+    }
+
+    "return the list when dropping nothing" in {
+      forAll { xs: Seq[Int] =>
+        val xl = List(xs: _*)
+        drop(xl, 0) shouldBe xl
+      }
+    }
+
+    "return nothing when dropping all elements of the list" in {
+      forAll { xs: Seq[Int] =>
+        val xl = List(xs: _*)
+        drop(xl, xs.length) shouldBe Nil
+      }
+    }
+  }
+}
+
+class ListSpec_firstVersion extends BaseSpec {
+
   // See [scala - How to define an arbitrary for a custom list in scalacheck? - Stack Overflow][1]
   // [1]: http://stackoverflow.com/questions/31878928/how-to-define-an-arbitrary-for-a-custom-list-in-scalacheck
 
@@ -20,6 +64,7 @@ class ListSpec extends BaseSpec {
 
   "tail" must {
     "return the list when concatenating an element with a list" in {
+      cancel("(old implementation; see ListSpec!)")
       forAll { (x: Int, xs: List[Int]) =>
         tail(Cons(x, xs)) shouldBe xs
       }
@@ -28,6 +73,7 @@ class ListSpec extends BaseSpec {
 
   "setHead" must {
     "return the element when concatenating an element with a list" in {
+      cancel("(old implementation; see ListSpec!)")
       forAll { (o: Int, x: Int, xs: List[Int]) =>
         setHead(Cons(o, xs), x) shouldBe Cons(x, xs)
       }
@@ -42,28 +88,31 @@ class ListSpec extends BaseSpec {
       tail <- if (n == 1) myNilGen else myConsGenOfN[T](n - 1)
     } yield Cons(head, tail)
 
-  "drop" must {
-    def myConsGenWithLength = for {
-      n <- Gen.choose(1, 5)
-      xs <- myConsGenOfN[Int](n)
-    } yield (xs, n)
+  def myConsGenWithLength = for {
+    n <- Gen.choose(1, 5)
+    xs <- myConsGenOfN[Int](n)
+  } yield (xs, n)
 
+  "drop" must {
     // turn off shrinking to show the exact error case!
     implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
 
     "return the second list after dropping all elements of the first, when concatenating two lists" in {
+      cancel("(old implementation; see ListSpec!)")
       forAll(myConsGenWithLength, myConsGen[Int]) { case ((xs, len), ys) =>
         drop(append(xs, ys), len) shouldBe ys
       }
     }
 
     "return the list when dropping nothing" in {
+      cancel("(old implementation; see ListSpec!)")
       forAll(myConsGenWithLength) { case (xs, len) =>
         drop(xs, 0) shouldBe xs
       }
     }
 
     "return nothing when dropping all elements of the list" in {
+      cancel("(old implementation; see ListSpec!)")
       forAll(myConsGenWithLength) { case (xs, len) =>
         drop(xs, len) shouldBe Nil
       }
