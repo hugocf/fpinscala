@@ -13,7 +13,7 @@ class GettingStartedSpec extends BaseSpec {
       val values = Table(("fib", "num"), fibonacci.zipWithIndex: _*)
       forAll(values) { (x, n) =>
         fib(n) shouldBe x
-        fib_non_tailrec(n) shouldBe x
+        fib_nonTailrecVersion(n) shouldBe x
       }
     }
 

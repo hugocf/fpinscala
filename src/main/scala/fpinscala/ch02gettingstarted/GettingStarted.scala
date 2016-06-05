@@ -51,7 +51,7 @@ object MyModule {
     go(n, 1, 0)
   }
 
-  def fib_first_tailrec_version(n: Int): Int = {
+  def fib_firstTailrecVersion(n: Int): Int = {
     @annotation.tailrec
     def go(curr: Int, fib_1: Int, fib_2: Int): Int = {
       val fib = if (curr == 0 || curr == 1) curr else fib_1 + fib_2
@@ -61,7 +61,7 @@ object MyModule {
     go(0, 0, 0)
   }
 
-  def fib_non_tailrec(n: Int): Int = {
+  def fib_nonTailrecVersion(n: Int): Int = {
     // @annotation.tailrec  // Error!
     def go(curr: Int): Int = {
       if (curr == 0 || curr == 1) curr
@@ -188,7 +188,7 @@ object PolymorphicFunctions {
       case Array(head, tail @ _*) => ???
    */
 
-  def isSorted_first_version[A](as: Array[A], gt: (A, A) => Boolean): Boolean = {
+  def isSorted_firstVersion[A](as: Array[A], gt: (A, A) => Boolean): Boolean = {
     @annotation.tailrec
     def go(element: A, arr: Array[A]): Boolean = {
       if (arr.isEmpty) true
