@@ -86,6 +86,40 @@ class ListSpec extends BaseSpec {
       }
     }
   }
+
+  "sum3" must {
+    "return the result of adding all list elements" in {
+      forAll { xs: Seq[Int] =>
+        val xl = List(xs: _*)
+        val lx = List(xs.reverse: _*)
+        sum3(xl) shouldBe sum3(lx)
+      }
+    }
+  }
+
+  "product3" must {
+    "return the result of multiplying all list elements" in {
+      val smallListOfDoubles = for {
+        n <- Gen.chooseNum(0, 10)
+        xs <- Gen.listOfN(n, Gen.chooseNum[Double](0, 100))
+      } yield xs
+
+      forAll(smallListOfDoubles) { xs =>
+        val xl = List(xs: _*)
+        val lx = List(xs.reverse: _*)
+        product3(xl) shouldBe (product3(lx) +- 0.01)
+      }
+    }
+  }
+
+  "length3" must {
+    "return the size of the list" in {
+      forAll { xs: Seq[Int] =>
+        val xl = List(xs: _*)
+        length3(xl) shouldBe xs.length
+      }
+    }
+  }
 }
 
 class ListSpec_firstVersion extends BaseSpec {
