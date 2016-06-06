@@ -77,6 +77,15 @@ class ListSpec extends BaseSpec {
       }
     }
   }
+
+  "foldLeft" must {
+    "tail recurse the aggregated value of the list" in {
+      forAll { xs: Seq[Int] =>
+        val xl = List(xs: _*)
+        foldLeft(xl, 0)((res, el) => res + 1) shouldBe xs.length
+      }
+    }
+  }
 }
 
 class ListSpec_firstVersion extends BaseSpec {
