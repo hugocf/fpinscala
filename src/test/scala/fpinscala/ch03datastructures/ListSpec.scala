@@ -59,6 +59,15 @@ class ListSpec extends BaseSpec {
       }
     }
   }
+
+  "init" must {
+    "return the initial list without the last element" in {
+      forAll { (xs: Seq[Int], y: Int) =>
+        val xyl = List(xs :+ y: _*)
+        init(xyl) shouldBe List(xs: _*)
+      }
+    }
+  }
 }
 
 class ListSpec_firstVersion extends BaseSpec {
