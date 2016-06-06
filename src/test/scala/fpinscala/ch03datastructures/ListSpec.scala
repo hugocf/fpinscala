@@ -1,7 +1,7 @@
 package fpinscala.ch03datastructures
 
 import fpinscala.BaseSpec
-import fpinscala.ch03datastructures.List._
+import fpinscala.ch03datastructures.List.{length => lengthCons, _}
 import org.scalacheck.{Arbitrary, Gen, Shrink}
 
 class ListSpec extends BaseSpec {
@@ -65,6 +65,15 @@ class ListSpec extends BaseSpec {
       forAll { (xs: Seq[Int], y: Int) =>
         val xyl = List(xs :+ y: _*)
         init(xyl) shouldBe List(xs: _*)
+      }
+    }
+  }
+
+  "length" must {
+    "return the size of the list" in {
+      forAll { xs: Seq[Int] =>
+        val xl = List(xs: _*)
+        lengthCons(xl) shouldBe xs.length
       }
     }
   }
