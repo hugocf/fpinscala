@@ -46,6 +46,19 @@ class ListSpec extends BaseSpec {
       }
     }
   }
+
+  "dropWhile" must {
+    "return the second list if all elements of the first list match, when concatenating two lists" in {
+      val negNums = Gen.listOf(Gen.negNum[Int])
+      val posNums = Gen.listOf(Gen.posNum[Int])
+      val predicate = (x: Int) => x < 0
+
+      forAll(negNums, posNums) { (xs, ys) =>
+        val xyl = List(xs ++ ys: _*)
+        dropWhile(xyl, predicate) shouldBe List(ys: _*)
+      }
+    }
+  }
 }
 
 class ListSpec_firstVersion extends BaseSpec {
