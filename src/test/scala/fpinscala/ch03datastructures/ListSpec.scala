@@ -5,6 +5,7 @@ import fpinscala.ch03datastructures.List.{length => lengthCons, _}
 import org.scalacheck.{Arbitrary, Gen, Shrink}
 
 class ListSpec extends BaseSpec {
+  import Gen._
 
   "tail" must {
     "return the list when concatenating an element with a list" in {
@@ -49,8 +50,8 @@ class ListSpec extends BaseSpec {
 
   "dropWhile" must {
     "return the second list if all elements of the first list match, when concatenating two lists" in {
-      val negNums = Gen.listOf(Gen.negNum[Int])
-      val posNums = Gen.listOf(Gen.posNum[Int])
+      val negNums = listOf(negNum[Int])
+      val posNums = listOf(posNum[Int])
       val predicate = (x: Int) => x < 0
 
       forAll(negNums, posNums) { (xs, ys) =>
@@ -88,7 +89,7 @@ class ListSpec extends BaseSpec {
     "tail recurse the aggregated value of the list" in {
       forAll { xs: Seq[Int] =>
         val xl = List(xs: _*)
-        foldLeft(xl, 0)((res, el) => res + 1) shouldBe xs.length
+        foldLeft(xl, 0)((res, _) => res + 1) shouldBe xs.length
       }
     }
   }
@@ -106,8 +107,8 @@ class ListSpec extends BaseSpec {
   "product3" must {
     "return the result of multiplying all list elements" in {
       val smallListOfDoubles = for {
-        n <- Gen.chooseNum(0, 10)
-        xs <- Gen.listOfN(n, Gen.chooseNum[Double](0, 100))
+        n <- chooseNum(0, 10)
+        xs <- listOfN(n, chooseNum[Double](0, 100))
       } yield xs
 
       forAll(smallListOfDoubles) { xs =>
