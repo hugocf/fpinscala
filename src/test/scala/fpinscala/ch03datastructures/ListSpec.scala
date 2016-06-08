@@ -145,6 +145,34 @@ class ListSpec extends BaseSpec {
       }
     }
   }
+
+  "foldLeft2 vs. foldRight2" when {
+    val listOfOnes = for {
+      n <- chooseNum(0, 100)
+      xs <- listOfN(n, 1)
+    } yield xs
+
+    "foldLeft2" must {
+      "display the aggregated value of the list" in {
+        forAll(listOfOnes) { xs =>
+          val xl = List(xs: _*)
+          // List(1, 1, 1) => (((0 - 1) - 1) - 1) = -3
+          foldLeft2(xl, 0)(_ - _) shouldBe -xs.length
+        }
+      }
+    }
+
+    "foldRight2" must {
+      "display the aggregated value of the list" in {
+        forAll(listOfOnes) { xs =>
+          val xl = List(xs: _*)
+          // List(1, 1)    =>      (1 - (1 - 0))  = 0
+          // List(1, 1, 1) => (1 - (1 - (1 - 0))) = 1
+          foldRight2(xl, 0)(_ - _) shouldBe xs.length % 2
+        }
+      }
+    }
+  }
 }
 
 class ListSpec_firstVersion extends BaseSpec {
