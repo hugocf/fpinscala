@@ -126,6 +126,24 @@ class ListSpec extends BaseSpec {
       }
     }
   }
+
+  "reverse" must {
+    "return the original list when reverse is applied twice" in {
+      forAll { xs: Seq[Int] =>
+        val xl = List(xs: _*)
+        reverse(reverse(xl)) shouldBe xl
+      }
+    }
+
+    "reverse two appended lists like the reverse of the second appended to the first" in {
+      forAll { (xs: Seq[Int], ys: Seq[Int]) =>
+        val xl = List(xs: _*)
+        val yl = List(ys: _*)
+        val xyl = List(xs ++ ys: _*)
+        reverse(xyl) shouldBe append(reverse(yl), reverse(xl))
+      }
+    }
+  }
 }
 
 class ListSpec_firstVersion extends BaseSpec {
