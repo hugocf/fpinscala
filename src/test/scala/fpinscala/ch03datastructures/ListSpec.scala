@@ -69,6 +69,12 @@ class ListSpec extends BaseSpec {
     }
   }
 
+  "exercise 3.8" should {
+    "see what happens when you pass Nil and Cons themselves to foldRight" in {
+      foldRight(List(1,2,3), Nil:List[Int])(Cons(_,_)) shouldBe List(1,2,3)
+    }
+  }
+
   "length" must {
     "return the size of the list" in {
       forAll { xs: Seq[Int] =>
