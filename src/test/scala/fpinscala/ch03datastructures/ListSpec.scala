@@ -5,6 +5,7 @@ import fpinscala.ch03datastructures.List.{length => lengthCons, _}
 import org.scalacheck.{Arbitrary, Gen, Shrink}
 
 class ListSpec extends BaseSpec {
+  import Arbitrary._
   import Gen._
 
   "tail" must {
@@ -170,6 +171,44 @@ class ListSpec extends BaseSpec {
           // List(1, 1, 1) => (1 - (1 - (1 - 0))) = 1
           foldRight2(xl, 0)(_ - _) shouldBe xs.length % 2
         }
+      }
+    }
+  }
+
+  "append2" must {
+    val nonEmptyList = nonEmptyListOf(arbitrary[Int])
+
+    "have total length equal to the sum of both list lengths" in {
+      forAll { (xs: Seq[Int], ys: Seq[Int]) =>
+        val xl = List(xs: _*)
+        val yl = List(ys: _*)
+        val xyl = List(xs ++ ys: _*)
+        lengthCons(append2(xl, yl)) shouldBe lengthCons(xl) + lengthCons(yl)
+      }
+    }
+
+    "respect the order of non-empty lists" in {
+      forAll(nonEmptyList, nonEmptyList) { (xs, ys) =>
+        val xl = List(xs: _*)
+        val yl = List(ys: _*)
+
+        val result = append2(xl, yl)
+
+        result match {
+          case Cons(head, tail) =>
+            val last = foldLeft(tail, None:Option[Int])((_, e) => Some(e)).value
+            last shouldBe ys.last
+            head shouldBe xs.head
+          case _ => assert(true)
+        }
+      }
+    }
+
+    "ignore empty lists" in {
+      forAll(nonEmptyList) { xs =>
+        val xl = List(xs: _*)
+        append2(xl, Nil) shouldBe xl
+        append2(Nil, xl) shouldBe xl
       }
     }
   }
