@@ -4,6 +4,26 @@ import fpinscala.BaseSpec
 import fpinscala.ch03datastructures.List.{length => lengthCons, _}
 import org.scalacheck.{Arbitrary, Gen, Shrink}
 
+object ConsListGenerator {
+  // See [scala - How to define an arbitrary for a custom list in scalacheck? - Stack Overflow][1]
+  // [1]: http://stackoverflow.com/questions/31878928/how-to-define-an-arbitrary-for-a-custom-list-in-scalacheck
+  val myNilGen: Gen[List[Nothing]] = Gen.delay(Nil)
+  implicit def myListArbitrary[T: Arbitrary]: Arbitrary[List[T]] = Arbitrary[List[T]](Gen.oneOf(myNilGen, myConsGen[T]))
+
+  def myConsGen[T: Arbitrary]: Gen[List[T]] = for {
+    head <- Arbitrary.arbitrary[T]
+    tail <- Gen.oneOf(myNilGen, myConsGen[T])
+  } yield Cons(head, tail)
+
+  /** Generate Cons list with fixed length */
+  def myConsGenOfN[T: Arbitrary](n: Int): Gen[List[T]] =
+    if (n == 0) myNilGen
+    else for {
+      head <- Arbitrary.arbitrary[T]
+      tail <- if (n == 1) myNilGen else myConsGenOfN[T](n - 1)
+    } yield Cons(head, tail)
+}
+
 class ListSpec extends BaseSpec {
   import Arbitrary._
   import Gen._
@@ -115,7 +135,7 @@ class ListSpec extends BaseSpec {
       forAll(smallListOfDoubles) { xs =>
         val xl = List(xs: _*)
         val lx = List(xs.reverse: _*)
-        product3(xl) shouldBe (product3(lx) +- 0.01)
+        product3(xl) shouldBe (product3(lx) +- 0.1)
       }
     }
   }
@@ -215,18 +235,7 @@ class ListSpec extends BaseSpec {
 }
 
 class ListSpec_firstVersion extends BaseSpec {
-
-  // See [scala - How to define an arbitrary for a custom list in scalacheck? - Stack Overflow][1]
-  // [1]: http://stackoverflow.com/questions/31878928/how-to-define-an-arbitrary-for-a-custom-list-in-scalacheck
-
-  private val myNilGen: Gen[List[Nothing]] = Gen.delay(Nil)
-
-  implicit def myListArbitrary[T: Arbitrary]: Arbitrary[List[T]] = Arbitrary[List[T]](Gen.oneOf(myNilGen, myConsGen[T]))
-
-  private def myConsGen[T: Arbitrary]: Gen[List[T]] = for {
-    head <- Arbitrary.arbitrary[T]
-    tail <- Gen.oneOf(myNilGen, myConsGen[T])
-  } yield Cons(head, tail)
+  import ConsListGenerator._
 
   "tail" must {
     "return the list when concatenating an element with a list" in {
@@ -246,22 +255,14 @@ class ListSpec_firstVersion extends BaseSpec {
     }
   }
 
-  /** Generate Cons list with fixed length */
-  private def myConsGenOfN[T: Arbitrary](n: Int): Gen[List[T]] =
-    if (n == 0) myNilGen
-    else for {
-      head <- Arbitrary.arbitrary[T]
-      tail <- if (n == 1) myNilGen else myConsGenOfN[T](n - 1)
-    } yield Cons(head, tail)
-
-  def myConsGenWithLength = for {
-    n <- Gen.choose(1, 5)
-    xs <- myConsGenOfN[Int](n)
-  } yield (xs, n)
-
   "drop" must {
     // turn off shrinking to show the exact error case!
     implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
+
+    def myConsGenWithLength = for {
+      n <- Gen.choose(1, 5)
+      xs <- myConsGenOfN[Int](n)
+    } yield (xs, n)
 
     "return the second list after dropping all elements of the first, when concatenating two lists" in {
       cancel("(old implementation; see ListSpec!)")
