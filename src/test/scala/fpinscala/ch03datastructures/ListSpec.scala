@@ -232,6 +232,32 @@ class ListSpec extends BaseSpec {
       }
     }
   }
+
+  "listOfLists" must {
+    import ConsListGenerator._
+
+    "have total length equal to the sum of all list lengths" in {
+      forAll { xs: List[List[Int]] =>
+        val totalLength = foldLeft(xs, 0)(_ + lengthCons(_))
+        lengthCons(listOfLists(xs)) shouldBe totalLength
+      }
+    }
+
+    "respect the order of the lists" in {
+      implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
+
+      val sortedLists = for {
+        chunks <- choose(1, 10)
+        length <- choose(chunks, 100)
+        ls <- listOfN(length, arbitrary[Int]) map { _.sorted.distinct }
+      } yield (ls, ls.grouped(chunks).toList)
+
+      forAll(sortedLists) { case (xs, xss) =>
+        val xll: List[List[Int]] = List(xss.map(List(_: _*)): _*)
+        listOfLists(xll) shouldBe List(xs: _*)
+      }
+    }
+  }
 }
 
 class ListSpec_firstVersion extends BaseSpec {
