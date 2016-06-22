@@ -112,5 +112,10 @@ object List { // `List` companion object. Contains functions for creating and wo
     foldLeft(l, Nil:List[A])((res, el) => append(res, el))
 //  foldRight(l, Nil:List[A])((el, res) => append(el, res))
 
+  def addOne(l: List[Int]): List[Int] = l match {
+    case Cons(h, t) => Cons(h + 1, addOne(t))
+    case _ => Nil
+  }
+
   def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
 }

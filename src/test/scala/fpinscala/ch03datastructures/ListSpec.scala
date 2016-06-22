@@ -290,9 +290,9 @@ class ListSpec extends BaseSpec {
     import ConsListGenerator._
 
     "have total length equal to the sum of all list lengths" in {
-      forAll { xs: List[List[Int]] =>
-        val totalLength = foldLeft(xs, 0)(_ + lengthCons(_))
-        lengthCons(listOfLists(xs)) shouldBe totalLength
+      forAll { xl: List[List[Int]] =>
+        val totalLength = foldLeft(xl, 0)(_ + lengthCons(_))
+        lengthCons(listOfLists(xl)) shouldBe totalLength
       }
     }
 
@@ -308,6 +308,16 @@ class ListSpec extends BaseSpec {
       forAll(sortedLists) { case (xs, xss) =>
         val xll: List[List[Int]] = List(xss.map(List(_: _*)): _*)
         listOfLists(xll) shouldBe List(xs: _*)
+      }
+    }
+  }
+
+  "addOne" must {
+    import ConsListGenerator._
+
+    "have the sum of the new list equal the sum of the original one plus its length" in {
+      forAll { xl: List[Int] =>
+        sum(addOne(xl)) shouldBe sum(xl) + lengthCons(xl)
       }
     }
   }
