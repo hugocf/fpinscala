@@ -24,6 +24,59 @@ object ConsListGenerator {
     } yield Cons(head, tail)
 }
 
+class ListSpec_firstVersion extends BaseSpec {
+  import ConsListGenerator._
+
+  "tail" must {
+    "return the list when concatenating an element with a list" in {
+      cancel("(old implementation; see ListSpec!)")
+      forAll { (x: Int, xs: List[Int]) =>
+        tail(Cons(x, xs)) shouldBe xs
+      }
+    }
+  }
+
+  "setHead" must {
+    "return the element when concatenating an element with a list" in {
+      cancel("(old implementation; see ListSpec!)")
+      forAll { (o: Int, x: Int, xs: List[Int]) =>
+        setHead(Cons(o, xs), x) shouldBe Cons(x, xs)
+      }
+    }
+  }
+
+  "drop" must {
+    // turn off shrinking to show the exact error case!
+    implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
+
+    def myConsGenWithLength = for {
+      n <- Gen.choose(1, 5)
+      xs <- myConsGenOfN[Int](n)
+    } yield (xs, n)
+
+    "return the second list after dropping all elements of the first, when concatenating two lists" in {
+      cancel("(old implementation; see ListSpec!)")
+      forAll(myConsGenWithLength, myConsGen[Int]) { case ((xs, len), ys) =>
+        drop(append(xs, ys), len) shouldBe ys
+      }
+    }
+
+    "return the list when dropping nothing" in {
+      cancel("(old implementation; see ListSpec!)")
+      forAll(myConsGenWithLength) { case (xs, len) =>
+        drop(xs, 0) shouldBe xs
+      }
+    }
+
+    "return nothing when dropping all elements of the list" in {
+      cancel("(old implementation; see ListSpec!)")
+      forAll(myConsGenWithLength) { case (xs, len) =>
+        drop(xs, len) shouldBe Nil
+      }
+    }
+  }
+}
+
 class ListSpec extends BaseSpec {
   import Arbitrary._
   import Gen._
@@ -255,59 +308,6 @@ class ListSpec extends BaseSpec {
       forAll(sortedLists) { case (xs, xss) =>
         val xll: List[List[Int]] = List(xss.map(List(_: _*)): _*)
         listOfLists(xll) shouldBe List(xs: _*)
-      }
-    }
-  }
-}
-
-class ListSpec_firstVersion extends BaseSpec {
-  import ConsListGenerator._
-
-  "tail" must {
-    "return the list when concatenating an element with a list" in {
-      cancel("(old implementation; see ListSpec!)")
-      forAll { (x: Int, xs: List[Int]) =>
-        tail(Cons(x, xs)) shouldBe xs
-      }
-    }
-  }
-
-  "setHead" must {
-    "return the element when concatenating an element with a list" in {
-      cancel("(old implementation; see ListSpec!)")
-      forAll { (o: Int, x: Int, xs: List[Int]) =>
-        setHead(Cons(o, xs), x) shouldBe Cons(x, xs)
-      }
-    }
-  }
-
-  "drop" must {
-    // turn off shrinking to show the exact error case!
-    implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
-
-    def myConsGenWithLength = for {
-      n <- Gen.choose(1, 5)
-      xs <- myConsGenOfN[Int](n)
-    } yield (xs, n)
-
-    "return the second list after dropping all elements of the first, when concatenating two lists" in {
-      cancel("(old implementation; see ListSpec!)")
-      forAll(myConsGenWithLength, myConsGen[Int]) { case ((xs, len), ys) =>
-        drop(append(xs, ys), len) shouldBe ys
-      }
-    }
-
-    "return the list when dropping nothing" in {
-      cancel("(old implementation; see ListSpec!)")
-      forAll(myConsGenWithLength) { case (xs, len) =>
-        drop(xs, 0) shouldBe xs
-      }
-    }
-
-    "return nothing when dropping all elements of the list" in {
-      cancel("(old implementation; see ListSpec!)")
-      forAll(myConsGenWithLength) { case (xs, len) =>
-        drop(xs, len) shouldBe Nil
       }
     }
   }
