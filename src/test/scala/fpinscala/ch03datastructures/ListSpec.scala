@@ -2,7 +2,9 @@ package fpinscala.ch03datastructures
 
 import fpinscala.BaseSpec
 import fpinscala.ch03datastructures.List.{length => lengthCons, _}
-import org.scalacheck.{Arbitrary, Gen, Shrink}
+import org.scalacheck._
+import org.scalacheck.Arbitrary._
+import org.scalacheck.Gen._
 
 object ConsListGenerator {
   // See [scala - How to define an arbitrary for a custom list in scalacheck? - Stack Overflow][1]
@@ -78,8 +80,6 @@ class ListSpec_firstVersion extends BaseSpec {
 }
 
 class ListSpec extends BaseSpec {
-  import Arbitrary._
-  import Gen._
 
   "tail" must {
     "return the list when concatenating an element with a list" in {
@@ -318,6 +318,18 @@ class ListSpec extends BaseSpec {
     "have the sum of the new list equal the sum of the original one plus its length" in {
       forAll { xl: List[Int] =>
         sum(addOne(xl)) shouldBe sum(xl) + lengthCons(xl)
+      }
+    }
+  }
+
+  "listToString" must {
+    val sourceAndTarget = for(n <- arbitrary[Double]) yield { (n, n.toString) }
+
+    "return the same list when " in {
+      forAll(listOf(sourceAndTarget)) { xs =>
+        val sl = List(xs.unzip._1: _*)
+        val tl = List(xs.unzip._2: _*)
+        listToString(sl) shouldBe tl
       }
     }
   }

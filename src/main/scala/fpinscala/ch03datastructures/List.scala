@@ -117,5 +117,10 @@ object List { // `List` companion object. Contains functions for creating and wo
     case _ => Nil
   }
 
+  def listToString(l: List[Double]): List[String] = l match {
+    case Cons(h, t) => Cons(h.toString, listToString(t))
+    case _ => Nil
+  }
+
   def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
 }
