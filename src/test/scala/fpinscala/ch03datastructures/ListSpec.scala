@@ -323,13 +323,26 @@ class ListSpec extends BaseSpec {
   }
 
   "listToString" must {
-    val sourceAndTarget = for(n <- arbitrary[Double]) yield { (n, n.toString) }
+    val tuple = for(n <- arbitrary[Double]) yield { (n, n.toString) }
 
-    "return the same list when " in {
-      forAll(listOf(sourceAndTarget)) { xs =>
-        val sl = List(xs.unzip._1: _*)
-        val tl = List(xs.unzip._2: _*)
-        listToString(sl) shouldBe tl
+    "return the list of each converted source value" in {
+      forAll(listOf(tuple)) { ts =>
+        val nl = List(ts.unzip._1: _*)
+        val sl = List(ts.unzip._2: _*)
+        listToString(nl) shouldBe sl
+      }
+    }
+  }
+
+  "map" must {
+    def f(d: Double) = s"This is a $d number"
+    val tuple = for(n <- arbitrary[Double]) yield { (n, f(n)) }
+
+    "return the list of each converted source value" in {
+      forAll(listOf(tuple)) { ts =>
+        val nl = List(ts.unzip._1: _*)
+        val sl = List(ts.unzip._2: _*)
+        map(nl)(f) shouldBe sl
       }
     }
   }

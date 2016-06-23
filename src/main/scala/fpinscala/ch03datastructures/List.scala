@@ -122,5 +122,8 @@ object List { // `List` companion object. Contains functions for creating and wo
     case _ => Nil
   }
 
-  def map[A,B](l: List[A])(f: A => B): List[B] = sys.error("todo")
+  def map[A,B](l: List[A])(f: A => B): List[B] = l match {
+    case Cons(h, t) => Cons(f(h), map(t)(f))
+    case _ => Nil
+  }
 }
