@@ -51,6 +51,9 @@ class ListSpec_firstVersion extends BaseSpec {
     // turn off shrinking to show the exact error case!
     implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
 
+    // See also https://gist.github.com/davidallsopp/f65d73fea8b5e5165fc3
+    // for other solutions to prevent shrinking from generating invalid values
+
     def myConsGenWithLength = for {
       n <- Gen.choose(1, 5)
       xs <- myConsGenOfN[Int](n)
