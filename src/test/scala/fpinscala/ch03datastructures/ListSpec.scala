@@ -6,6 +6,8 @@ import org.scalacheck._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen._
 
+import scala.util.Random
+
 object ConsListGenerator {
   // See [scala - How to define an arbitrary for a custom list in scalacheck? - Stack Overflow][1]
   // [1]: http://stackoverflow.com/questions/31878928/how-to-define-an-arbitrary-for-a-custom-list-in-scalacheck
@@ -346,6 +348,41 @@ class ListSpec extends BaseSpec {
         val nl = List(ts.unzip._1: _*)
         val sl = List(ts.unzip._2: _*)
         map(nl)(f) shouldBe sl
+      }
+    }
+  }
+
+  "filter" must {
+    import ConsListGenerator._
+    val isEven: Int => Boolean = _ % 2 == 0
+    val isOdd: Int => Boolean = !isEven(_)
+
+    "be idempotent: apply it twice is the same as doing it once" in {
+      forAll { xl: List[Int] =>
+        val evenNums = filter(xl)(isEven)
+        filter(evenNums)(isEven) shouldBe evenNums
+      }
+    }
+
+    "return the same if applied before or after appending two lists" in {
+      forAll { (xl: List[Int], yl: List[Int]) =>
+        filter(append(xl, yl))(isEven) shouldBe append(filter(xl)(isEven), filter(yl)(isEven))
+      }
+    }
+
+    "keep only the even numbers of the list" in {
+      // turn off shrinking to show the exact error case!
+      implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
+
+      val evenGen = for (n <- choose(-5000, 5000)) yield n * 2
+      val oddGen = for (n <- choose(-5000, 5000)) yield n * 2 + 1
+      val evens = (listOf(evenGen), "evens")
+      val odds = (listOf(oddGen), "odds")
+
+      forAll(odds, evens) { (os, es) =>
+        val oel = List(Random.shuffle(os ++ es): _*)
+        val el = List(es: _*)
+        filter(oel)(isEven) shouldBe el
       }
     }
   }
