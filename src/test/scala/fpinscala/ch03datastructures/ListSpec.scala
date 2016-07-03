@@ -386,4 +386,14 @@ class ListSpec extends BaseSpec {
       }
     }
   }
+
+  "flatMap" must {
+    "return a single list of duplicate items" in {
+      forAll { xs: Seq[Int] =>
+        val xl = List(xs.sorted: _*)
+        val xxl = List((xs ++ xs).sorted: _*)
+        flatMap(xl)(i => List(i, i)) shouldBe xxl
+      }
+    }
+  }
 }

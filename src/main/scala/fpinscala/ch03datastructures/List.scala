@@ -132,4 +132,9 @@ object List { // `List` companion object. Contains functions for creating and wo
     case _ => Nil
   }
 
+  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] = as match {
+    case Cons(h, t) => append(f(h), flatMap(t)(f))
+    case _ => Nil
+  }
+
 }
