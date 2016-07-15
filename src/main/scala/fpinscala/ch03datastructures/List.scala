@@ -127,7 +127,7 @@ object List { // `List` companion object. Contains functions for creating and wo
     case _ => Nil
   }
 
-  def filter[A](as: List[A])(f: A => Boolean): List[A] = as match {
+  def filter_firstVersion[A](as: List[A])(f: A => Boolean): List[A] = as match {
     case Cons(h, t) => if (f(h)) Cons(h, filter(t)(f)) else filter(t)(f)
     case _ => Nil
   }
@@ -136,5 +136,8 @@ object List { // `List` companion object. Contains functions for creating and wo
     case Cons(h, t) => append(f(h), flatMap(t)(f))
     case _ => Nil
   }
+
+  def filter[A](as: List[A])(f: A => Boolean): List[A] =
+    flatMap(as)(a => if (f(a)) List(a) else List())
 
 }

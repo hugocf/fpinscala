@@ -374,25 +374,30 @@ class ListSpec extends BaseSpec {
       // turn off shrinking to show the exact error case!
       implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
 
+      // List(a, b, c), List(d, e)
+      // => List((a,0), (b,1), (c,2), (d,0), (e,1)) // zipWithIndex & ++
+      // => List((a,0), (d,0), (b,1), (e,1), (c,2)) // sortBy
+      // => List(a, d, b, e, c)                     // map
+      def interleave(as: Seq[Int], bs: Seq[Int]) = (as.zipWithIndex ++ bs.zipWithIndex).sortBy(_._2).map(_._1)
+
       val evenGen = for (n <- choose(-5000, 5000)) yield n * 2
       val oddGen = for (n <- choose(-5000, 5000)) yield n * 2 + 1
       val evens = (listOf(evenGen), "evens")
       val odds = (listOf(oddGen), "odds")
 
       forAll(odds, evens) { (os, es) =>
-        val oel = List(Random.shuffle(os ++ es): _*)
-        val el = List(es: _*)
-        filter(oel)(isEven) shouldBe el
+        val oes = interleave(os, es)
+        filter(List(oes: _*))(isEven) shouldBe List(es: _*)
       }
     }
   }
 
   "flatMap" must {
-    "return a single list of duplicate items" in {
+    "return a single list of duplicate items, in the original order" in {
+      val dup = (i: Int) => List(i, i)
       forAll { xs: Seq[Int] =>
-        val xl = List(xs.sorted: _*)
-        val xxl = List((xs ++ xs).sorted: _*)
-        flatMap(xl)(i => List(i, i)) shouldBe xxl
+        val xxs = xs.foldLeft(Seq.empty[Int]) { (res, el) => res :+ el :+ el }
+        flatMap(List(xs: _*))(dup) shouldBe List(xxs: _*)
       }
     }
   }
