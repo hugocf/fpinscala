@@ -401,4 +401,58 @@ class ListSpec extends BaseSpec {
       }
     }
   }
+
+  "addLists" when {
+    import ConsListGenerator._
+    implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
+
+    "[GOOD] testing with properties that force the correct implementation" must {
+      "add a list to another with M multiples of each element is the same multiplying the first by M+1" in {
+        val smallNumber = choose(0, 10)
+        forAll(smallNumber, arbitrary[List[Int]]) { (m, xl) =>
+          val yl = map(xl) { _ * m }
+          val zl = map(xl) { _ * (m + 1) }
+          addLists(xl, yl) shouldBe zl
+        }
+      }
+    }
+
+    "[BAD] testing with properties that allow bogus implementations" must {
+      // For example, this implementation passes all the properties below:
+      // addLists(List(1, 2, 3), List(4, 5)) => List(0, 0, 15)
+
+      "preserve the length of the longest list" in {
+        forAll { (xl: List[Int], yl: List[Int]) =>
+          val xn = lengthCons(xl)
+          val yn = lengthCons(yl)
+          val maxLen = if (xn > yn) xn else yn
+          lengthCons(addLists(xl, yl)) shouldBe maxLen
+        }
+      }
+
+      "be the same as adding the lists independently" in {
+        forAll { (xl: List[Int], yl: List[Int]) =>
+          List(sum(addLists(xl, yl))) shouldBe addLists(List(sum(xl)), List(sum(yl)))
+        }
+      }
+
+      "be commutative" in {
+        forAll { (xl: List[Int], yl: List[Int]) =>
+          addLists(xl, yl) shouldBe addLists(yl, xl)
+        }
+      }
+
+      "return one of the lists when adding zeros" in {
+        val listOfZeros = for {
+          n <- chooseNum(0, 100)
+          xs <- listOfN(n, 0)
+        } yield xs
+
+        forAll(arbitrary[List[Int]], listOfZeros) { (xl, zs) =>
+          val zl = List(zs: _*)
+          addLists(xl, zl) shouldBe addLists(zl, xl)
+        }
+      }
+    }
+  }
 }
