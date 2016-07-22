@@ -456,4 +456,18 @@ class ListSpec extends BaseSpec {
       }
     }
   }
+
+  "zipWith" when {
+    import ConsListGenerator._
+    implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
+
+    "apply the function to each pair of the list" in {
+      val smallNumber = choose(0, 10)
+      forAll(smallNumber, arbitrary[List[Int]]) { (m, xl) =>
+        val yl = map(xl)(_ * m)
+        val zl = map(xl)(_ * (m + 1))
+        zipWith(xl, yl)(_+_) shouldBe zl
+      }
+    }
+  }
 }

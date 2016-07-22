@@ -140,8 +140,14 @@ object List { // `List` companion object. Contains functions for creating and wo
   def filter[A](as: List[A])(f: A => Boolean): List[A] =
     flatMap(as)(a => if (f(a)) List(a) else List())
 
-  def addLists(l1: List[Int], l2: List[Int]): List[Int] = (l1, l2) match {
+  def addLists(al: List[Int], bl: List[Int]): List[Int] = (al, bl) match {
     case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, addLists(t1, t2))
+    case (l1, Nil) => l1
+    case (Nil, l2) => l2
+  }
+
+  def zipWith[A](al: List[A], bl: List[A])(f: (A, A) => A): List[A] = (al, bl) match {
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
     case (l1, Nil) => l1
     case (Nil, l2) => l2
   }
