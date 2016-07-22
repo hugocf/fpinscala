@@ -2,16 +2,15 @@ package fpinscala.ch03datastructures
 
 import fpinscala.BaseSpec
 import fpinscala.ch03datastructures.List.{length => lengthCons, _}
-import org.scalacheck._
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen._
-
-import scala.util.Random
+import org.scalacheck._
 
 object ConsListGenerator {
   // See [scala - How to define an arbitrary for a custom list in scalacheck? - Stack Overflow][1]
   // [1]: http://stackoverflow.com/questions/31878928/how-to-define-an-arbitrary-for-a-custom-list-in-scalacheck
   val myNilGen: Gen[List[Nothing]] = Gen.delay(Nil)
+
   implicit def myListArbitrary[T: Arbitrary]: Arbitrary[List[T]] = Arbitrary[List[T]](Gen.oneOf(myNilGen, myConsGen[T]))
 
   def myConsGen[T: Arbitrary]: Gen[List[T]] = for {
@@ -20,15 +19,17 @@ object ConsListGenerator {
   } yield Cons(head, tail)
 
   /** Generate Cons list with fixed length */
-  def myConsGenOfN[T: Arbitrary](n: Int): Gen[List[T]] =
+  def myConsGenOfN[T: Arbitrary](n: Int): Gen[List[T]] = {
     if (n == 0) myNilGen
     else for {
       head <- Arbitrary.arbitrary[T]
       tail <- if (n == 1) myNilGen else myConsGenOfN[T](n - 1)
     } yield Cons(head, tail)
+  }
 }
 
 class ListSpec_firstVersion extends BaseSpec {
+
   import ConsListGenerator._
 
   "tail" must {
@@ -151,7 +152,7 @@ class ListSpec extends BaseSpec {
 
   "exercise 3.8" should {
     "see what happens when you pass Nil and Cons themselves to foldRight" in {
-      foldRight(List(1,2,3), Nil:List[Int])(Cons(_,_)) shouldBe List(1,2,3)
+      foldRight(List(1, 2, 3), Nil: List[Int])(Cons(_, _)) shouldBe List(1, 2, 3)
     }
   }
 
@@ -274,7 +275,7 @@ class ListSpec extends BaseSpec {
 
         result match {
           case Cons(head, tail) =>
-            val last = foldLeft(tail, None:Option[Int])((_, e) => Some(e)).value
+            val last = foldLeft(tail, None: Option[Int])((_, e) => Some(e)).value
             last shouldBe ys.last
             head shouldBe xs.head
           case _ => assert(true)
@@ -307,7 +308,7 @@ class ListSpec extends BaseSpec {
       val sortedLists = for {
         chunks <- choose(1, 10)
         length <- choose(chunks, 100)
-        ls <- listOfN(length, arbitrary[Int]) map { _.sorted.distinct }
+        ls <- listOfN(length, arbitrary[Int]) map (_.sorted.distinct)
       } yield (ls, ls.grouped(chunks).toList)
 
       forAll(sortedLists) { case (xs, xss) =>
@@ -328,7 +329,7 @@ class ListSpec extends BaseSpec {
   }
 
   "listToString" must {
-    val tuple = for(n <- arbitrary[Double]) yield { (n, n.toString) }
+    val tuple = for (n <- arbitrary[Double]) yield (n, n.toString)
 
     "return the list of each converted source value" in {
       forAll(listOf(tuple)) { ts =>
@@ -341,7 +342,7 @@ class ListSpec extends BaseSpec {
 
   "map" must {
     def f(d: Double) = s"This is a $d number"
-    val tuple = for(n <- arbitrary[Double]) yield { (n, f(n)) }
+    val tuple = for (n <- arbitrary[Double]) yield (n, f(n))
 
     "return the list of each converted source value" in {
       forAll(listOf(tuple)) { ts =>
@@ -410,8 +411,8 @@ class ListSpec extends BaseSpec {
       "add a list to another with M multiples of each element is the same multiplying the first by M+1" in {
         val smallNumber = choose(0, 10)
         forAll(smallNumber, arbitrary[List[Int]]) { (m, xl) =>
-          val yl = map(xl) { _ * m }
-          val zl = map(xl) { _ * (m + 1) }
+          val yl = map(xl)(_ * m)
+          val zl = map(xl)(_ * (m + 1))
           addLists(xl, yl) shouldBe zl
         }
       }
