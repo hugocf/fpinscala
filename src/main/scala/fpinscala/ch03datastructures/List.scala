@@ -152,4 +152,17 @@ object List { // `List` companion object. Contains functions for creating and wo
     case (Nil, l2) => l2
   }
 
+  def hasSubsequence[A](sup: List[A], sub: List[A]): Boolean = {
+    def isSubsequence(sup: List[A], sub: List[A]): Boolean = (sup, sub) match {
+      case (Cons(hsup, tsup), Cons(hsub, tsub)) => hsup == hsub && isSubsequence(tsup, tsub)
+      case (_, Nil) => true
+      case _ => false
+    }
+
+    (sup, sub) match {
+      case (Cons(_, tsup), Cons(_, _)) => isSubsequence(sup, sub) || hasSubsequence(tsup, sub)
+      case _ => false
+    }
+  }
+
 }

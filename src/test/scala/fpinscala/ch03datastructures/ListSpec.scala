@@ -261,7 +261,6 @@ class ListSpec extends BaseSpec {
       forAll { (xs: Seq[Int], ys: Seq[Int]) =>
         val xl = List(xs: _*)
         val yl = List(ys: _*)
-        val xyl = List(xs ++ ys: _*)
         lengthCons(append2(xl, yl)) shouldBe lengthCons(xl) + lengthCons(yl)
       }
     }
@@ -372,7 +371,6 @@ class ListSpec extends BaseSpec {
     }
 
     "keep only the even numbers of the list" in {
-      // turn off shrinking to show the exact error case!
       implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
 
       // List(a, b, c), List(d, e)
@@ -404,8 +402,8 @@ class ListSpec extends BaseSpec {
   }
 
   "addLists" when {
-    import ConsListGenerator._
     implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
+    import ConsListGenerator._
 
     "[GOOD] testing with properties that force the correct implementation" must {
       "add a list to another with M multiples of each element is the same multiplying the first by M+1" in {
@@ -457,16 +455,46 @@ class ListSpec extends BaseSpec {
     }
   }
 
-  "zipWith" when {
-    import ConsListGenerator._
+  "zipWith" must {
     implicit def noShrink[T]: Shrink[T] = Shrink.shrinkAny
+    import ConsListGenerator._
 
-    "apply the function to each pair of the list" in {
+    "apply the function to each pair of elements from both lists" in {
       val smallNumber = choose(0, 10)
       forAll(smallNumber, arbitrary[List[Int]]) { (m, xl) =>
         val yl = map(xl)(_ * m)
         val zl = map(xl)(_ * (m + 1))
         zipWith(xl, yl)(_+_) shouldBe zl
+      }
+    }
+  }
+
+  "hasSubsequence" must {
+    val chunk = choose(1, 100)
+
+    "be true for every chunk taken from the original list" in {
+      forAll(chunk, arbitrary[Seq[Int]]) { (n, xs) =>
+        val chunks = xs.grouped(n).toList
+        chunks.foreach { l =>
+          hasSubsequence(List(xs: _*), List(l: _*)) shouldBe true
+        }
+      }
+    }
+
+    "be false for every list chunk taken from the reverse list" in {
+      val list = arbitrary[Seq[Int]] suchThat { _.length >= 2 }
+      forAll(chunk, list) { (n, xs) =>
+        val sorted = xs.distinct.sorted
+        val reverseChunks = sorted.reverse.grouped(n).toList.filterNot(_.length == 1)
+        reverseChunks.foreach { r =>
+          hasSubsequence(List(sorted: _*), List(r: _*)) shouldBe false
+        }
+      }
+    }
+
+    "be false for every sub list greater than the main list" in {
+      forAll(nonEmptyListOf(arbitrary[Int])) { xs =>
+        hasSubsequence(List(xs: _*), List(xs ++ xs: _*)) shouldBe false
       }
     }
   }
