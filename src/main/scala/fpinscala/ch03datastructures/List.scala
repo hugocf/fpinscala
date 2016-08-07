@@ -159,10 +159,7 @@ object List { // `List` companion object. Contains functions for creating and wo
       case _ => false
     }
 
-    (sup, sub) match {
-      case (Cons(_, tsup), Cons(_, _)) => isSubsequence(sup, sub) || hasSubsequence(tsup, sub)
-      case _ => false
-    }
+    sup != Nil && (isSubsequence(sup, sub) || hasSubsequence(tail(sup), sub))
   }
 
 }
