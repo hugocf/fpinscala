@@ -60,9 +60,11 @@ object List { // `List` companion object. Contains functions for creating and wo
     case _ => Nil
   }
 
+  // https://github.com/dabd/fpscala/commit/5adb9c03225143d3c0036c4ec44378ed4a67847a#diff-21e741bb07e57f54026a51f23688ed8bR23
+  // Optimised to drop out immediatly if list is Nil, instead of doing the recursion til the end
   def drop[A](l: List[A], n: Int): List[A] = n match {
     case 0 => l
-    case m => drop(tail(l), m - 1)
+    case m => if (l == Nil) Nil else drop(tail(l), m - 1)
   }
 
   def dropWhile[A](l: List[A], f: A => Boolean): List[A] = l match {

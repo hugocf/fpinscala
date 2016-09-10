@@ -9,7 +9,7 @@ import org.scalacheck._
 object ConsListGenerator {
   // See [scala - How to define an arbitrary for a custom list in scalacheck? - Stack Overflow][1]
   // [1]: http://stackoverflow.com/questions/31878928/how-to-define-an-arbitrary-for-a-custom-list-in-scalacheck
-  val myNilGen: Gen[List[Nothing]] = Gen.delay(Nil)
+  val myNilGen: Gen[List[Nothing]] = Gen.const(Nil)
 
   implicit def myListArbitrary[T: Arbitrary]: Arbitrary[List[T]] = Arbitrary[List[T]](Gen.oneOf(myNilGen, myConsGen[T]))
 
@@ -94,6 +94,19 @@ class ListSpec extends BaseSpec {
         tail(Cons(x, xl)) shouldBe xl
       }
     }
+
+    // https://github.com/dabd/fpscala/commit/73ba1c798db6bac7d3caf9f32b6a78cf78f16e67
+    // i.e. using pattern matching to obtain the head/tail of a generated list,
+    //      instead of prepending a single element to the generated list.
+    "see another way of doing it, via @dabd" in {
+      forAll { xs: Seq[Int] =>
+        val xl = List(xs: _*)
+        xl match {
+          case Cons(h, t) => tail(xl) shouldBe t
+          case Nil => ()
+        }
+      }
+    }
   }
 
   "setHead" must {
@@ -139,6 +152,19 @@ class ListSpec extends BaseSpec {
         dropWhile(xyl, predicate) shouldBe List(ys: _*)
       }
     }
+
+    // https://github.com/dabd/fpscala/commit/a1835fec4f60fd87ad7c8015d95bcbee8102c473#diff-453a8faaaebabd41f8181f2318ee68d2R62
+    // Nice tip about using arbitrary functions
+    "see another way of doing it, via @dabd" in {
+      forAll { (xs: Seq[Int], f: Int => Boolean) =>
+        val xl = List(xs: _*)
+        xl match {
+          case Nil => dropWhile(Nil, f) shouldBe Nil
+          case Cons(h, t) if f(h) => dropWhile(xl, f) shouldBe dropWhile(t, f)
+          case Cons(h, t) if !f(h) => dropWhile(xl, f) shouldBe xl
+        }
+      }
+    }
   }
 
   "init" must {
@@ -160,7 +186,18 @@ class ListSpec extends BaseSpec {
     "return the size of the list" in {
       forAll { xs: Seq[Int] =>
         val xl = List(xs: _*)
-        lengthCons(xl) shouldBe xs.length
+        lengthCons(xl) shouldBe xs.length // well, this is cheating a bit
+      }
+    }
+
+    // https://github.com/dabd/fpscala/commit/5adb9c03225143d3c0036c4ec44378ed4a67847a
+    "see another way of doing it, via @dabd" in {
+      forAll { xs: Seq[Int] =>
+        val xl = List(xs: _*)
+        xl match {
+          case Cons(_, t) => lengthCons(xl) shouldBe lengthCons(t) + 1
+          case Nil => ()
+        }
       }
     }
   }
@@ -220,12 +257,13 @@ class ListSpec extends BaseSpec {
       forAll { (xs: Seq[Int], ys: Seq[Int]) =>
         val xl = List(xs: _*)
         val yl = List(ys: _*)
-        val xyl = List(xs ++ ys: _*)
-        reverse(xyl) shouldBe append(reverse(yl), reverse(xl))
+        reverse(append(xl, yl)) shouldBe append(reverse(yl), reverse(xl))
       }
     }
   }
 
+  // See also “universal property of fold” (http://www.cs.nott.ac.uk/~pszgmh/fold.pdf)
+  // via @dabd (https://github.com/dabd/fpscala/commit/a1835f#diff-453a8faaaebabd41f8181f2318ee68d2R92)
   "foldLeft2 vs. foldRight2" when {
     val listOfOnes = for {
       n <- chooseNum(0, 100)
